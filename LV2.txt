@@ -1,0 +1,108 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+#define N 10000000// Promijeni po potrebi
+#define X -1     // Vrijednost koja ne postoji
+
+// Definicija čvora povezanog popisa
+typedef struct Node {
+    int value;
+    struct Node* next;
+} Node;
+
+// Funkcija za stvaranje povezanog popisa iz niza
+Node* create_linked_list(int* array, int size) {
+    if (size == 0) return NULL;
+
+    Node* head = (Node*)malloc(sizeof(Node));
+    head->value = array[0];
+    head->next = NULL;
+
+    Node* current = head;
+    for (int i = 1; i < size; i++) {
+        Node* new_node = (Node*)malloc(sizeof(Node));
+        new_node->value = array[i];
+        new_node->next = NULL;
+        current->next = new_node;
+        current = new_node;
+    }
+    return head;
+}
+
+// Pretraživanje niza
+int search_array(int* array, int size, int target) {
+    for (int i = 0; i < size; i++) {
+        if (array[i] == target)
+            return i;
+    }
+    return -1;
+}
+
+// Pretraživanje povezanog popisa
+int search_list(Node* head, int target) {
+    int index = 0;
+    while (head != NULL) {
+        if (head->value == target)
+            return index;
+        head = head->next;
+        index++;
+    }
+    return -1;
+}
+
+// Funkcija za mjerenje vremena u milisekundama
+double get_time_diff_ms(clock_t start, clock_t end) {
+    return (double)(end - start) * 1000.0 / CLOCKS_PER_SEC;
+}
+
+int main() {
+    srand(time(NULL));
+    int* array = (int*)malloc(N * sizeof(int));
+    if (array == NULL) {
+        printf("Nedovoljno memorije za niz.\n");
+        return 1;
+    }
+
+    // Formiranje niza
+    clock_t start = clock();
+    for (int i = 0; i < N; i++) {
+        array[i] = rand();
+    }
+    clock_t end = clock();
+    double array_create_time = get_time_diff_ms(start, end);
+
+    // Formiranje povezanog popisa
+    start = clock();
+    Node* head = create_linked_list(array, N);
+    end = clock();
+    double list_create_time = get_time_diff_ms(start, end);
+
+    // Pretraživanje niza
+    start = clock();
+    int result_array = search_array(array, N, X);
+    end = clock();
+    double array_search_time = get_time_diff_ms(start, end);
+
+    // Pretraživanje povezanog popisa
+    start = clock();
+    int result_list = search_list(head, X);
+    end = clock();
+    double list_search_time = get_time_diff_ms(start, end);
+
+    // Ispis rezultata
+    printf("Formiranje niza: %.2f ms\n", array_create_time);
+    printf("Formiranje povezanog popisa: %.2f ms\n", list_create_time);
+    printf("Pretraživanje niza: %.2f ms\n", array_search_time);
+    printf("Pretraživanje povezanog popisa: %.2f ms\n", list_search_time);
+
+    // Oslobađanje memorije
+    free(array);
+    while (head != NULL) {
+        Node* tmp = head;
+        head = head->next;
+        free(tmp);
+    }
+
+    return 0;
+}
